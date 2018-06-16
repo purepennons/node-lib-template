@@ -1,27 +1,48 @@
-import resolve from 'rollup-plugin-node-resolve';
+import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
+import external from 'rollup-plugin-peer-deps-external';
+import resolve from 'rollup-plugin-node-resolve';
+
 import pkg from './package.json';
 
 export default [
-  // browser-friendly UMD build
   {
     input: 'src/index.js',
     output: {
-      name: 'lingui-string-validation',
+      name: 'linguiStringValidation',
       file: pkg.browser,
       format: 'umd'
     },
     plugins: [
-      resolve(), // so Rollup can find `ms`
-      commonjs() // so Rollup can convert `ms` to an ES module
+      external(),
+      babel({
+        exclude: 'node_modules/**',
+        plugins: ['external-helpers']
+      }),
+      resolve(),
+      commonjs()
     ]
   },
   {
     input: 'src/index.js',
-    external: [],
     output: [
-      { file: pkg.main, format: 'cjs' },
-      { file: pkg.module, format: 'es' }
+      {
+        file: pkg.main,
+        format: 'cjs'
+      },
+      {
+        file: pkg.module,
+        format: 'es'
+      }
+    ],
+    plugins: [
+      external(),
+      babel({
+        exclude: 'node_modules/**',
+        plugins: ['external-helpers']
+      }),
+      resolve(),
+      commonjs()
     ]
   }
 ];
